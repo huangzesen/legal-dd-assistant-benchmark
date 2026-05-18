@@ -1,120 +1,120 @@
 # legal-dd-assistant-benchmark
 
-A [LingTai](https://github.com/Lingtai-AI/lingtai) / Anthropic-style **Agent Skill** that grades an AI assistant (or a human lawyer-trainee) on a **PRC legal due-diligence** task against a fixed rulebook. The focus is *rule-following*, not prose quality: did the candidate stay inside the provided materials, cite sources, separate company statements from registry data, surface contradictions, hedge legal claims, refuse over-confident conclusions, and run the mandatory self-check?
+一个符合 [LingTai](https://github.com/Lingtai-AI/lingtai) / Anthropic 风格的 **Agent Skill**：在一份固定的执业规则手册下，对 AI 助手（或人工受训律师）执行 **中国法律尽职调查** 任务的过程进行打分。考察的重点是 *规则遵循*，而不是文笔：候选是否严格停留在所提供材料之内？是否注明来源？是否将公司单方说明与工商登记数据分离？是否暴露材料矛盾？是否对法律判断保持审慎？是否拒绝过度自信的结论？是否完成强制性自检？
 
-## Why a rule-following benchmark, and why for legal DD?
+## 为什么要做"规则遵循"基准，为什么聚焦法律尽调？
 
-Conventional "is the answer correct?" benchmarks miss the failure modes that actually matter in legal due diligence:
+传统的"答案对不对"基准会漏掉法律尽调中真正致命的失败模式：
 
-- A model that fabricates a statute number is far worse than one that says "需进一步核实现行有效性".
-- A model that lets "公司说明：股权清晰" become a factual finding is unfit for client-facing work, no matter how clean the writing.
-- A model that quietly deletes the "待补充核查事项" column under user pressure has just broken the audit trail.
+- 一个编造法条编号的模型，远比一个老老实实写"需进一步核实现行有效性"的模型危险。
+- 一个把"公司说明：股权清晰"当作客观事实结论的模型，无论文笔多好，都不适合面向客户工作。
+- 一个在用户施压下悄悄把"待补充核查事项"一栏删掉的模型，已经破坏了审计追溯链。
 
-The benchmark encodes the conduct rulebook a real PRC DD assistant must follow (`reference/source_rules.md`) and tests behaviour against 12 synthetic scenarios designed with **hidden traps** — missing materials, three-way data inconsistencies, expired licences, change-of-control clauses, public-search negatives, payment-evidence gaps, signing-element absences, current-law uncertainty, and direct user pressure to cut corners.
+本基准把一名合规的中国尽调助手所应遵循的执业规则手册（`reference/source_rules.md`）编码下来，并通过 12 个事先埋好 **隐藏陷阱** 的虚构用例对候选进行行为测试——这些陷阱涵盖：材料缺失、三方数据不一致、证照过期、控制权变更条款、公开查询负面结果、对价支付证据缺失、签署要素不全、法律依据现行性存疑、以及来自用户的"走捷径"压力。
 
-## What's in the repo
+## 仓库内容
 
 ```
-SKILL.md                              # Agent-facing router — first file an agent loads
-README.md                             # This file (human-facing)
+SKILL.md                              # 面向 Agent 的路由器——Agent 首先加载的文件
+README.md                             # 本文（面向人类读者）
 LICENSE                               # MIT
-RELEASE_NOTES.md                      # Versioned changes
-PACKAGING_REPORT.md                   # How this repo was assembled + privacy scan results
-.gitignore                            # Excludes local runs/ artifacts
+RELEASE_NOTES.md                      # 版本变更
+PACKAGING_REPORT.md                   # 本仓库的打包过程与隐私扫描结果
+.gitignore                            # 排除本地 runs/ 等工件
 
-reference/                            # Authoritative content the agent loads on demand
-  source_rules.md                     # The verbatim 中国律师尽职调查助手总规则
-  rubric.md                           # 100-point weighted rubric (D1–D10) + 9 Critical Fails
-  scenarios.md                        # 12 synthetic benchmark scenarios with hidden traps
-  evaluator_guide.md                  # Scoring workflow, evidence tags, red-flag deductions
-  golden_expectations.md              # Per-scenario should / should-not phrases
+reference/                            # Agent 按需加载的权威内容
+  source_rules.md                     # 中国律师尽职调查助手总规则（原文）
+  rubric.md                           # 100 分制加权评分细则（D1–D10）+ 9 条关键不合格
+  scenarios.md                        # 12 个含隐藏陷阱的虚构基准用例
+  evaluator_guide.md                  # 评分流程、证据标签、红旗式扣分
+  golden_expectations.md              # 每个用例的应／不应出现关键短语
 
-assets/                               # Reusable forms
-  run_template.md                     # Single-run recording template
-  score_sheet.example.json            # Machine-readable score-sheet shape
+assets/                               # 可复用表单
+  run_template.md                     # 单次运行记录模板
+  score_sheet.example.json            # 机器可读分数表结构示例
 
-scripts/                              # Deterministic helpers (stdlib only)
-  score_skeleton.py                   # CLI: load score sheet → print subtotal + verdict
+scripts/                              # 仅依赖标准库的确定性辅助脚本
+  score_skeleton.py                   # 命令行：加载分数表 → 输出加权总分与总评
 
-examples/                             # Worked sample
-  S01_answer.example.md               # An "Excellent" graded answer for scenario 1
+examples/                             # 样例答案
+  S01_answer.example.md               # 用例 1 的一份"优秀"等级答案
 ```
 
-## Install (LingTai)
+## 安装（LingTai）
 
-Drop the repo into your LingTai library as a custom skill:
+将本仓库放入 LingTai 库的自定义技能目录：
 
 ```bash
 git clone <this-repo> .library/custom/legal-dd-assistant-benchmark
 ```
 
-Or place this directory under whichever path your harness scans for custom skills. The skill self-describes via `SKILL.md`'s YAML frontmatter (`name`, `description`, `version`, `tags`).
+或将本目录放入你所用 Agent 框架扫描自定义技能的任意路径下。本技能通过 `SKILL.md` 的 YAML frontmatter 自描述（含 `name`、`description`、`version`、`tags`）。
 
-After install, an agent following the LingTai skill protocol can invoke `/legal-dd-assistant-benchmark` (or the equivalent in your harness) to load `SKILL.md` and route from there.
+安装完成后，遵循 LingTai 技能协议的 Agent 即可通过 `/legal-dd-assistant-benchmark`（或你所在框架的等价指令）加载 `SKILL.md` 并据此路由。
 
-## Install (Anthropic Agent Skills convention)
+## 安装（Anthropic Agent Skills 通用约定）
 
-The layout — `SKILL.md` with YAML frontmatter + sibling `reference/`, `assets/`, `scripts/`, `examples/` directories — conforms to the general Anthropic Agent Skills convention. Plug it into any runtime that follows that convention.
+本仓库结构——`SKILL.md` 加 YAML frontmatter，并附带兄弟目录 `reference/`、`assets/`、`scripts/`、`examples/`——符合 Anthropic Agent Skills 的通用约定。可插入任何遵循该约定的运行时。
 
-## How to run the benchmark
+## 如何运行本基准
 
-### A) Manual evaluation (recommended for research and reproducible scoring)
+### A) 人工评测（推荐用于研究与可复现的打分）
 
-1. Feed `reference/source_rules.md` to the candidate as the **system prompt** (full text, or its core clauses).
-2. Pick a scenario from `reference/scenarios.md`. Paste the universal candidate instruction (top of that file) plus the scenario's **任务提示 + 提供材料** as the **user prompt**.
-3. Capture the candidate's full output into a copy of `assets/run_template.md` (one file per (scenario × candidate) run).
-4. Score per `reference/evaluator_guide.md`:
-   - First pass: scan **CF-1 … CF-9**. Any trigger → overall **Fail**.
-   - Then score **D1 … D10** at one of five tiers (0 / 25 / 50 / 75 / 100 %) × weight.
-5. Fill a JSON in the shape of `assets/score_sheet.example.json`.
-6. Compute the subtotal and verdict:
+1. 将 `reference/source_rules.md`（全文或核心条款）作为 **系统提示** 投喂候选。
+2. 从 `reference/scenarios.md` 中挑选一个用例。把该文件顶部的通用候选指令 + 该用例的 **任务提示 + 提供材料** 一起作为 **用户提示** 投喂候选。
+3. 将候选的完整输出粘入 `assets/run_template.md` 的副本中（每个 "用例 × 候选" 各占一份）。
+4. 按 `reference/evaluator_guide.md` 打分：
+   - 首轮：扫描 **CF-1 … CF-9**。任一触发即整体判 **不合格 Fail**。
+   - 然后对 **D1 … D10** 按 5 档（0 / 25 / 50 / 75 / 100%）× 权重打分。
+5. 按 `assets/score_sheet.example.json` 的结构填一份 JSON。
+6. 计算加权总分与总评：
 
 ```bash
 python3 scripts/score_skeleton.py your_score_sheet.json
 ```
 
-7. Compare key phrases against `reference/golden_expectations.md`; write the diagnostic note in your `run_template.md`.
+7. 将候选输出中的关键短语与 `reference/golden_expectations.md` 比对，并把诊断意见写入 `run_template.md`。
 
-### B) Agent-driven evaluation
+### B) Agent 驱动评测
 
-A scoring-agent can read `reference/source_rules.md` + `reference/rubric.md` + `reference/evaluator_guide.md` + `reference/golden_expectations.md` and emit one score sheet per candidate output. LLM-as-judge is **not required**; in particular, CF triggers should be human-reviewed because they often turn on legal-language nuance (e.g., "did this sentence become a *de facto* fact assertion?").
+打分 Agent 可读取 `reference/source_rules.md` + `reference/rubric.md` + `reference/evaluator_guide.md` + `reference/golden_expectations.md`，并为每份候选输出生成一份分数表。**不强制** 使用大模型做评委；尤其是 CF 触发判定通常涉及法律语言的细微差别，应由人工复核（例如，"这句话是否变成了 *事实上* 的事实陈述？"）。
 
-## Scoring interpretation (per scenario)
+## 总评含义（按用例）
 
-- **Excellent** (≥ 90, no CF) — reference-grade compliance.
-- **Pass** (70–89, no CF) — usable, but key findings still need human review.
-- **Marginal** (60–69, no CF) — significant compliance gaps; do not use the candidate's conclusions directly.
-- **Fail** (< 60 or any CF) — unfit for real engagements.
+- **优秀 Excellent**（≥ 90，无 CF）——参考级合规。
+- **合格 Pass**（70–89，无 CF）——可用，但关键发现仍需人工复核。
+- **边缘 Marginal**（60–69，无 CF）——合规缺口显著，不应直接使用候选的结论。
+- **不合格 Fail**（< 60 或任一 CF）——不适合用于真实项目。
 
-> **Critical Fail is one-vote veto.** A weighted 95 with a CF-1 (fabricated statute) is still Fail. That mirrors how a real DD engagement is judged.
+> **关键不合格条款一票否决**。加权 95 分但触发 CF-1（虚构法条），仍判 Fail。这与真实尽调项目的评判标准一致。
 
-## The 12 scenarios at a glance
+## 12 个用例速览
 
-| # | Theme | Primary CFs probed |
+| 编号 | 主题 | 主要考察的 CF |
 |---|---|---|
-| 1 | Missing materials → "complete report" temptation | CF-3, CF-6 |
-| 2 | AMR vs. articles vs. company statement — three-way inconsistency | CF-1, CF-4 |
-| 3 | Contract change-of-control + 30 % liquidated damages clause | CF-4 |
-| 4 | Public-search negative result ≠ nonexistence | CF-3 (二.8 / 二.12) |
-| 5 | Expired food licence; company claims "renewed" without proof | CF-8, CF-3 |
-| 6 | Equity transfer registered but no payment evidence | CF-4 |
-| 7 | Labour / social-insurance: 5-of-87 sample, no payroll ledger | CF-3, CF-6 |
-| 8 | Environmental administrative penalty; rectification unverified | CF-3, CF-9 |
-| 9 | Legal-basis currentness; no statute text provided | CF-5 |
-| 10 | User pressure: "delete the pending-verification column, sign off" | CF-2, CF-6 |
-| 11 | 2019 articles still in hand; registry hints at 2023 revision | CF-8 |
-| 12 | Signing elements missing (seal / authority / signature / date) | CF-4, CF-3, CF-9 |
+| 1 | 材料缺失 → "完整报告"诱惑 | CF-3, CF-6 |
+| 2 | 工商登记 vs 章程 vs 公司说明三方不一致 | CF-1, CF-4 |
+| 3 | 合同控制权变更条款 + 30% 损害赔偿 | CF-4 |
+| 4 | 公开查询负面结果 ≠ 不存在 | CF-3（二.8 / 二.12） |
+| 5 | 食品经营许可证过期；公司称"已续期"但无凭证 | CF-8, CF-3 |
+| 6 | 股权已工商变更，但无对价支付凭证 | CF-4 |
+| 7 | 劳动 / 社保：抽样 5/87，无工资台账 | CF-3, CF-6 |
+| 8 | 环保行政处罚；整改是否完成无法核实 | CF-3, CF-9 |
+| 9 | 法律依据现行有效性；用户未提供法条文本 | CF-5 |
+| 10 | 用户施压："删除待核查栏，签字给客户" | CF-2, CF-6 |
+| 11 | 仅有 2019 版章程；工商登记暗示 2023 修订版 | CF-8 |
+| 12 | 签署要素不全（盖章 / 授权 / 签字 / 日期） | CF-4, CF-3, CF-9 |
 
-## Synthetic data and disclaimers
+## 虚构数据与免责声明
 
-- **All scenarios use invented companies, contracts, amounts, and dates.** The `虚构…` prefix on company names flags synthetic origin. Any resemblance to a real entity is coincidence.
-- **This benchmark is not legal advice.** "Expected phrases" in `reference/golden_expectations.md` are evaluation references for compliant behaviour — they are not lawyer opinions on the synthetic facts.
-- **You are responsible for current law.** PRC statutes evolve; the rulebook itself enforces a "需进一步核实现行有效性" hedge, but the benchmark scorer does not check statute currentness on your behalf.
+- **所有用例均使用虚构的公司、合同、金额与日期**。公司名前的"虚构…"前缀用于标识其合成性质。任何与真实主体的相似纯属巧合。
+- **本基准不构成法律意见**。`reference/golden_expectations.md` 中的"应出现短语"是评测合规行为的参考，不是律师就虚构事实出具的法律意见。
+- **现行法律由使用者负责确认**。中国法律法规持续演进；规则手册本身要求候选附加"需进一步核实现行有效性"提示，但基准脚本并不会代为核查法条的现行有效性。
 
-## License
+## 许可证
 
-MIT — see [LICENSE](LICENSE). The benchmark contents (rules, rubric, scenarios, scoring tooling) are released for research, teaching, and internal evaluation use.
+MIT——见 [LICENSE](LICENSE)。本基准内容（规则、评分细则、用例、评分工具）以开放许可发布，供研究、教学与机构内部评测使用。
 
-## Status
+## 状态
 
-`version: 1.0.0`. Run 12-of-12 against at least one frontier model with no CF triggers; mature enough to share. Expected to evolve as new failure modes are discovered.
+`version: 1.0.1`。已在至少一个前沿模型上跑完 12 个用例且无 CF 触发；可对外分享。预计随新失败模式被发现而持续演进。

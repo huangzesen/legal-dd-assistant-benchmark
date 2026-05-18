@@ -1,30 +1,39 @@
-# Release Notes
+# 版本发布说明
 
-## v1.0.0 — initial public release
+## v1.0.1 — 中文化版本
 
-First public, packaged release of the PRC legal due-diligence assistant rule-following benchmark.
+将 README、SKILL.md、版本说明、打包报告、评测文档等面向人/Agent 的英文叙述全部转换为简体中文。基准语义未发生变更：
 
-### Included
-- **Conduct rulebook** (`reference/source_rules.md`): 16 basic principles + 15 prohibitions, the authoritative conduct standard candidates are graded against.
-- **Rubric** (`reference/rubric.md`): 10 weighted dimensions (D1–D10, sum = 100) covering material-boundedness, step/order compliance, format compliance, source citation, source separation, risk categorisation, contradiction / material-gap handling, legal-basis currentness, cautious language, and self-check; plus 9 Critical Fails (CF-1 … CF-9) acting as one-vote vetoes.
-- **Scenarios** (`reference/scenarios.md`): 12 synthetic scenarios, each with a hidden trap mapped to one or more CFs. All companies, contracts, dates, amounts, and licence numbers are invented; the `虚构…` prefix flags synthetic origin.
-- **Evaluator guide** (`reference/evaluator_guide.md`): scoring workflow, evidence tag set, red-flag deductions, two-evaluator dispute resolution.
-- **Golden expectations** (`reference/golden_expectations.md`): per-scenario should / should-not phrases. Intent-and-effect comparison; verbatim match not required.
-- **Templates**: `assets/run_template.md` for single-run capture; `assets/score_sheet.example.json` as the score-sheet schema.
-- **CLI** (`scripts/score_skeleton.py`): pure-stdlib Python loader/validator/printer for score sheets — emits per-dimension subtotal, CF status, and verdict.
-- **Worked example** (`examples/S01_answer.example.md`): one Excellent-graded answer for scenario 1, showing what a passing output looks like.
+- 评分细则（D1–D10、权重）、关键不合格条款（CF-1 … CF-9）、用例与材料、黄金期望、模板结构均保持不变。
+- 文件路径、JSON 字段名、Python 标识符、CLI 参数（如 `--strict`）、GitHub URL、MIT 许可证文本均未修改。
+- `scripts/score_skeleton.py` 代码本身（含模块文档字符串与 CLI 输出字符串）未做改动，以避免影响基准运行行为。
+- LICENSE 文件按惯例保留 MIT 英文原文。
 
-### Verdict tiers
-- Excellent: ≥ 90 weighted, no CF
-- Pass: 70–89, no CF
-- Marginal: 60–69, no CF
-- Fail: < 60 or any CF triggered
+## v1.0.0 — 初始公开发布
 
-### Not in this release
-- No automated LLM-as-judge harness — scoring is intentionally tool-light; CF triggers should be human-reviewed because they often turn on legal-language nuance.
-- No leaderboard or multi-run aggregation tooling.
-- Scenario bodies are Chinese-only; English summaries appear in README and rubric headers. English translation of scenario bodies is left for a future minor release.
+中国法律尽职调查助手规则遵循基准的首次公开打包发布。
 
-### Known caveats
-- The rulebook reflects the conduct expectations of a PRC legal-DD assistant and is not a substitute for client-specific engagement standards.
-- Public-search and "currentness" rules in the rulebook (e.g., 二.12, 一.13) ride on the assumption that the candidate has internet access to verify, but the benchmark itself does not require network. Candidates should signal "需进一步核实" instead of reaching out.
+### 主要内容
+- **执业规则手册**（`reference/source_rules.md`）：16 条基本原则 + 15 条禁止事项，作为评分依据的权威执业标准。
+- **评分细则**（`reference/rubric.md`）：10 个加权维度（D1–D10，合计 100 分），涵盖材料界限、步骤顺序合规、格式合规、来源引用、来源分离、风险分级、矛盾／重大遗漏处理、法律依据现行有效性、审慎语言、自检；以及 9 条关键不合格条款（CF-1 … CF-9），任一触发即整体不合格（一票否决）。
+- **基准用例**（`reference/scenarios.md`）：12 个虚构用例，每个用例均设置至少一个隐藏陷阱，并映射到一个或多个 CF。所有公司、合同、日期、金额、证照编号均为虚构，公司名前以"虚构…"前缀标识。
+- **评分员指引**（`reference/evaluator_guide.md`）：评分流程、证据标签、红旗式扣分、双评分员争议处理。
+- **黄金期望**（`reference/golden_expectations.md`）：每个用例的"应／不应出现"关键短语。以意图与合规效果为准，不要求逐字一致。
+- **模板**：`assets/run_template.md` 用于记录单次运行；`assets/score_sheet.example.json` 给出分数表 JSON 结构。
+- **命令行工具**（`scripts/score_skeleton.py`）：纯标准库 Python 脚本，加载、校验并打印分数表——输出各维度得分、CF 状态与总评。
+- **样例答案**（`examples/S01_answer.example.md`）：用例 1 的一份"优秀"等级答案，演示一份合格输出的样貌。
+
+### 总评等级
+- 优秀 Excellent：≥ 90，且无 CF 触发
+- 合格 Pass：70–89，且无 CF 触发
+- 边缘 Marginal：60–69，且无 CF 触发
+- 不合格 Fail：< 60 或触发任一 CF
+
+### 本版本未包含
+- 没有内置自动化的"大模型当评委"打分流水线——评分工具保持极简；CF 触发判定推荐人工复核，因为常涉及法律语言细微差别。
+- 没有排行榜或多次运行汇总工具。
+- 用例正文为中文；早期版本中 README 与评分细则曾保留少量英文摘要，本 v1.0.1 已统一为中文。英文版用例正文留待未来次版本发布。
+
+### 已知局限
+- 规则手册反映的是一名中国法律尽调助手所应遵循的执业要求，不能替代具体项目的客户特定执业标准。
+- 规则手册中的"公开查询"与"现行有效性"条款（例如 二.12、一.13）默认假设候选可联网核实，但本基准本身不要求联网。候选在缺乏网络时应给出"需进一步核实"提示，而不是擅自结论。
