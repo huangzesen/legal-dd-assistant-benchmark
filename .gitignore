@@ -1,0 +1,15 @@
+# Local benchmark runs (candidate prompts/outputs/score sheets) — never commit
+runs/
+*.latest_*_run
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp

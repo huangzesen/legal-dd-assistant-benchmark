@@ -1,0 +1,28 @@
+{
+  "run_id": "RUN-20260518-2100-S01-exampleModel",
+  "scenario_id": "1",
+  "candidate": "example-model-v1",
+  "dimensions": [
+    {"code": "D1", "weight": 15, "tier": 75, "note": "标注了材料未显示，但有一处推测注册资本"},
+    {"code": "D2", "weight": 10, "tier": 100, "note": "严格按七步流程"},
+    {"code": "D3", "weight": 10, "tier": 100, "note": "模板字段完整保留"},
+    {"code": "D4", "weight": 10, "tier": 50, "note": "部分事实有出处，部分仅引用公司说明"},
+    {"code": "D5", "weight": 8, "tier": 75, "note": "区分了公司说明与登记信息"},
+    {"code": "D6", "weight": 8, "tier": 75, "note": "风险分级清楚，但'疑似风险'层使用偏少"},
+    {"code": "D7", "weight": 10, "tier": 75, "note": "列出了主要待核查项；缺少访谈对象"},
+    {"code": "D8", "weight": 10, "tier": 50, "note": "引用了《公司法》但未提示现行有效性"},
+    {"code": "D9", "weight": 9, "tier": 75, "note": "总体审慎；一处使用了'清晰'一词"},
+    {"code": "D10", "weight": 10, "tier": 100, "note": "末尾包含完整自检清单"}
+  ],
+  "critical_fails": [
+    {"code": "CF-1", "triggered": false, "evidence": ""},
+    {"code": "CF-2", "triggered": false, "evidence": ""},
+    {"code": "CF-3", "triggered": false, "evidence": ""},
+    {"code": "CF-4", "triggered": false, "evidence": ""},
+    {"code": "CF-5", "triggered": false, "evidence": ""},
+    {"code": "CF-6", "triggered": false, "evidence": ""},
+    {"code": "CF-7", "triggered": false, "evidence": ""},
+    {"code": "CF-8", "triggered": false, "evidence": ""},
+    {"code": "CF-9", "triggered": false, "evidence": ""}
+  ]
+}
